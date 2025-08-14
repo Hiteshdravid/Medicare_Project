@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 500px;
+        }
+        .flash-message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+        .flash-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .flash-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .flash-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container mx-auto p-8 bg-white rounded-lg shadow-2xl">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Email Setup</h1>
+        <p class="text-gray-600 text-center mb-6">
+            Please enter your Gmail address and the **16-digit App Password** to enable email notifications.
+            <br>
+            <a href="https://myaccount.google.com/security" target="_blank" class="text-blue-500 hover:text-blue-700 underline">Get your App Password here</a>.
+        </p>
+        
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="flash-message {% if category == 'success' %}flash-success{% elif category == 'error' %}flash-error{% elif category == 'info' %}flash-info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-4">
+            {{ form.hidden_tag() }}
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">{{ form.email.label }}</label>
+                {{ form.email(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2") }}
+            </div>
+            <div>
+                <label for="app_password" class="block text-sm font-medium text-gray-700">{{ form.app_password.label }}</label>
+                {{ form.app_password(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2") }}
+            </div>
+            <div class="flex justify-center pt-4">
+                {{ form.submit(class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer") }}
+            </div>
+        </form>
+    </div>
+</body>
+</html>
