@@ -1,269 +1,251 @@
-<!DOCTYPE html>
-<html lang="en" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCarePlus - Patient Portal</title>
-    <!-- Link to the external stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="main-body">
+    <!DOCTYPE html>
+    <html lang="en" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MediCare - Patient Portal</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+    <body class="main-body">
 
-    <!-- The header now uses the new image with a semi-transparent black overlay for readability -->
-    <header class="main-header">
-        <!-- Overlay to ensure text is readable -->
-        <div class="overlay"></div>
-        <div class="header-content">
-            <h1 class="main-title">MediCarePlus</h1>
-            <p class="subtitle">
-                Your health, our priority. Comprehensive patient care at your fingertips.
-            </p>
-            <a href="#appointments" class="cta-button">
-                Schedule Appointment
-            </a>
+        <!-- Header Section -->
+<header class="main-header">
+    <div class="header-content flex items-center justify-between">
+        <div>
+            <h1 class="main-title">MediCare</h1>
+            <p class="subtitle">Your health, our priority. Comprehensive patient care at your fingertips.</p>
         </div>
-    </header>
-
-    <!-- Main Content - Kept the semi-transparent background for readability -->
-    <main class="main-content">
-        <!-- This is the new section that will display flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul class="flashes">
-                    {% for category, message in messages %}
-                        <li class="{{ category }}">{{ message }}</li>
-                    {% endfor %}
-                </ul>
+        <div class="header-actions flex gap-2">
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('logout') }}" class="cta-button">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="cta-button">Login</a>
+                <a href="{{ url_for('register') }}" class="cta-button">Register</a>
             {% endif %}
-        {% endwith %}
+        </div>
+    </div>
+</header>
 
-        <!-- Appointment Form Section -->
-        <section id="appointments" class="section">
-            <div class="container">
-                <h2 class="section-title">Schedule an Appointment</h2>
-                
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Flash Messages Section -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Appointment Form Section -->
+            <section id="appointments" class="section">
+             {% if 'user_id' not in session %}
+                <div class="login-prompt mt-12 p-6 bg-yellow-200 border-2 border-red-600 rounded-lg text-center">
+                    <p class="text-3xl md:text-4xl font-extrabold text-red-700">
+                        Please <a href="{{ url_for('login') }}" class="underline">login</a> or 
+                        <a href="{{ url_for('register') }}" class="underline">register</a> to book appointments
+                    </p>
+                </div>
+            {% else %}
+
                 <div class="form-card">
-                    <form id="appointmentForm" action="{{ url_for('index') }}" method="POST" class="form-group">
-                        {{ form.hidden_tag() }} <!-- Include this for CSRF protection -->
-                        <div class="form-grid">
-                            <div>
-                                {{ form.fullName.label(class="label") }}
-                                {{ form.fullName(class="input-field") }}
-                            </div>
-                            <div>
-                                {{ form.email.label(class="label") }}
-                                {{ form.email(class="input-field") }}
-                            </div>
-                            <div>
-                                {{ form.phone.label(class="label") }}
-                                {{ form.phone(class="input-field") }}
-                            </div>
-                            <div>
-                                {{ form.dob.label(class="label") }}
-                                {{ form.dob(class="input-field") }}
-                            </div>
-                            <div>
-                                {{ form.doctor.label(class="label") }}
-                                {{ form.doctor(class="input-field") }}
-                            </div>
-                            <div>
-                                {{ form.appointmentDate.label(class="label") }}
-                                {{ form.appointmentDate(class="input-field") }}
-                            </div>
+                    <h2 class="section-title">Schedule an Appointment</h2>
+                    <form method="POST" action="/schedule_appointment" class="form">
+                        {{ form.hidden_tag() }} <!-- Included for CSRF protection -->
+                        <div>
+                            {{ form.full_name.label(class="block text-gray-700 mb-2") }}
+                            {{ form.full_name(class="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500") }}
                         </div>
                         <div>
-                            {{ form.reason.label(class="label") }}
-                            {{ form.reason(class="input-field", rows="3") }}
+                            {{ form.email.label(class="block text-gray-700 mb-2") }}
+                            {{ form.email(class="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500") }}
                         </div>
                         <div>
-                            <input type="checkbox" id="emailReminder" name="emailReminder" checked>
-                            <label for="emailReminder" class="label-inline">Send me email reminders for this appointment</label>
+                            {{ form.appointment_date.label(class="block text-gray-700 mb-2") }}
+                            {{ form.appointment_date(class="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500") }}
                         </div>
-                        <button type="submit" class="submit-button-blue">
+                        <div>
+                            {{ form.reason.label(class="block text-gray-700 mb-2") }}
+                            {{ form.reason(class="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500") }}
+                        </div>
+                        <div>
+                            {{ form.doctor.label(class="block text-gray-700 mb-2") }}
+                            {{ form.doctor(class="w-full px-4 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500") }}
+                        </div>
+                        <div>
+                        <button type="submit" class=" submit-button-green ">
                             Schedule Appointment
                         </button>
+                        </div>
                     </form>
                 </div>
-            </div>
-        </section>
+            </section>
+            {% endif %}
+            <!-- Prescription Section -->
+            <section id="prescriptions" class="section">
+                <div class="container">
+                    <h2 class="section-title">Manage Prescriptions</h2>
+                    <div class="form-card mb-10">
+                        <form id="prescriptionForm" class="form-group" method="POST" action="/add_prescription">
+    <div class="form-grid">
+        <div>
+            <label for="patientId" class="label">Patient ID/Email</label>
+            <input type="text" id="patientId" name="email" required class="input-field">
+        </div>
+        <div>
+            <label for="prescriptionType" class="label">Prescription Type</label>
+            <select id="prescriptionType" name="type" required class="input-field">
+                <option value="">-- Select Type --</option>
+                <option value="medication">Medication</option>
+                <option value="lab_test">Lab Test</option>
+                <option value="procedure">Medical Procedure</option>
+            </select>
+        </div>
+        <div>
+            <label for="medicationName" class="label">Medication/Test Name</label>
+            <input type="text" id="medicationName" name="medication" required class="input-field">
+        </div>
+        <div>
+            <label for="dosage" class="label">Dosage/Frequency</label>
+            <input type="text" id="dosage" name="dosage" required class="input-field">
+        </div>
+        <div>
+            <label for="startDate" class="label">Start Date</label>
+            <input type="date" id="startDate" name="start_date" required class="input-field">
+        </div>
+        <div>
+            <label for="endDate" class="label">End Date</label>
+            <input type="date" id="endDate" name="end_date" class="input-field">
+        </div>
+    </div>
+    <div>
+        <label for="instructions" class="label">Special Instructions</label>
+        <textarea id="instructions" name="instructions" rows="3" class="input-field"></textarea>
+    </div>
+    <div>
+        <input type="checkbox" id="emailNotification" name="emailNotification" checked>
+        <label for="emailNotification" class="label-inline">Email this prescription to patient</label>
+    </div>
+    <button type="submit" class="submit-button-green">Add Prescription</button>
+</form>
 
-        <!-- Prescription Section -->
-        <section id="prescriptions" class="section">
-            <div class="container">
-                <h2 class="section-title">Manage Prescriptions</h2>
-                
-                <div class="form-card mb-10">
-                    <form id="prescriptionForm" class="form-group">
-                        <div class="form-grid">
-                            <div>
-                                <label for="patientId" class="label">Patient ID/Email</label>
-                                <input type="text" id="patientId" name="patientId" required class="input-field">
-                            </div>
-                            <div>
-                                <label for="prescriptionType" class="label">Prescription Type</label>
-                                <select id="prescriptionType" name="prescriptionType" required class="input-field">
-                                    <option value="">-- Select Type --</option>
-                                    <option value="medication">Medication</option>
-                                    <option value="lab_test">Lab Test</option>
-                                    <option value="procedure">Medical Procedure</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="medicationName" class="label">Medication/Test Name</label>
-                                <input type="text" id="medicationName" name="medicationName" required class="input-field">
-                            </div>
-                            <div>
-                                <label for="dosage" class="label">Dosage/Frequency</label>
-                                <input type="text" id="dosage" name="dosage" required class="input-field">
-                            </div>
-                            <div>
-                                <label for="startDate" class="label">Start Date</label>
-                                <input type="date" id="startDate" name="startDate" required class="input-field">
-                            </div>
-                            <div>
-                                <label for="endDate" class="label">End Date</label>
-                                <input type="date" id="endDate" name="endDate" class="input-field">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="instructions" class="label">Special Instructions</label>
-                            <textarea id="instructions" name="instructions" rows="3" class="input-field"></textarea>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="emailNotification" name="emailNotification" checked>
-                            <label for="emailNotification" class="label-inline">Email this prescription to patient</label>
-                        </div>
-                        <button type="submit" class="submit-button-green">
-                            Add Prescription
-                        </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Appointments List Section -->
-        <section id="appointmentsList" class="section">
-            <div class="container">
-                <h2 class="section-title">Your Appointments</h2>
-                
-                <div class="list-container" id="appointmentsContainer">
-                    <!-- Sample appointment - would be populated from database -->
-                    <div class="appointment-card">
-                        <div class="list-item-content">
-                            <div class="list-item-text">
-                                <h3 class="list-title">Cardiology Consultation</h3>
-                                <p class="list-subtitle">With Dr. Sarah Smith</p>
-                                <p class="list-meta"><i class="far fa-calendar-alt icon"></i> June 15, 2023 at 10:00 AM</p>
-                                <p class="list-meta"><i class="far fa-clock icon"></i> 30 minute appointment</p>
-                            </div>
-                            <div class="list-actions">
-                                <button class="action-button-blue">
-                                    <i class="fas fa-envelope icon"></i> Send Reminder
-                                </button>
-                                <button class="action-button-red cancel-btn" data-appointment-id="app1">
-                                    <i class="fas fa-times icon"></i> Cancel
-                                </button>
+            <!-- Appointments List Section -->
+            <section id="appointmentsList" class="section">
+                <div class="container">
+                    <h2 class="section-title">Your Appointments</h2>
+                    <div class="list-container" id="appointmentsContainer">
+                        <!-- Sample appointment - would be populated from database -->
+                        <div class="appointment-card">
+                            <div class="list-item-content">
+                                <div class="list-item-text">
+                                    <h3 class="list-title">Cardiology Consultation</h3>
+                                    <p class="list-subtitle">With Dr. Sarah Smith</p>
+                                    <p class="list-meta"><i class="far fa-calendar-alt icon"></i> June 15, 2023 at 10:00 AM</p>
+                                    <p class="list-meta"><i class="far fa-clock icon"></i> 30 minute appointment</p>
+                                </div>
+                                <div class="list-actions">
+                                    <button class="action-button-blue">
+                                        <i class="fas fa-envelope icon"></i> Send Reminder
+                                    </button>
+                                    <button class="action-button-red cancel-btn" data-appointment-id="app1">
+                                        <i class="fas fa-times icon"></i> Cancel
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Second sample appointment -->
-                    <div class="appointment-card">
-                        <div class="list-item-content">
-                            <div class="list-item-text">
-                                <h3 class="list-title">Annual Physical</h3>
-                                <p class="list-subtitle">With Dr. Emily Williams</p>
-                                <p class="list-meta"><i class="far fa-calendar-alt icon"></i> June 22, 2023 at 2:30 PM</p>
-                                <p class="list-meta"><i class="far fa-clock icon"></i> 1 hour appointment</p>
-                            </div>
-                            <div class="list-actions">
-                                <button class="action-button-blue">
-                                    <i class="fas fa-envelope icon"></i> Send Reminder
-                                </button>
-                                <button class="action-button-red cancel-btn" data-appointment-id="app2">
-                                    <i class="fas fa-times icon"></i> Cancel
-                                </button>
+                        
+                        <!-- Second sample appointment -->
+                        <div class="appointment-card">
+                            <div class="list-item-content">
+                                <div class="list-item-text">
+                                    <h3 class="list-title">Annual Physical</h3>
+                                    <p class="list-subtitle">With Dr. Emily Williams</p>
+                                    <p class="list-meta"><i class="far fa-calendar-alt icon"></i> June 22, 2023 at 2:30 PM</p>
+                                    <p class="list-meta"><i class="far fa-clock icon"></i> 1 hour appointment</p>
+                                </div>
+                                <div class="list-actions">
+                                    <button class="action-button-blue">
+                                        <i class="fas fa-envelope icon"></i> Send Reminder
+                                    </button>
+                                    <button class="action-button-red cancel-btn" data-appointment-id="app2">
+                                        <i class="fas fa-times icon"></i> Cancel
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Prescription List Section -->
-        <section id="prescriptionsList">
-            <div class="container">
-                <h2 class="section-title">Your Prescriptions</h2>
-                
-                <div class="list-container" id="prescriptionsContainer">
-                    <!-- Sample prescription - would be populated from database -->
-                    <div class="prescription-item">
-                        <div class="list-item-content-flex">
-                            <div class="list-item-text">
-                                <h3 class="list-title">Lisinopril</h3>
-                                <p class="list-subtitle">20mg tablet</p>
-                                <p class="list-meta"><i class="far fa-calendar-alt icon"></i> Started: May 1, 2023</p>
-                                <p class="list-meta"><i class="fas fa-prescription-bottle-alt icon"></i> Take one tablet daily in the morning</p>
-                            </div>
-                            <div>
-                                <span class="status-tag active">Active</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Second sample prescription -->
-                    <div class="prescription-item">
-                        <div class="list-item-content-flex">
-                            <div class="list-item-text">
-                                <h3 class="list-title">Complete Blood Count (CBC)</h3>
-                                <p class="list-subtitle">Lab Test</p>
-                                <p class="list-meta"><i class="far fa-calendar-alt icon"></i> Ordered: June 5, 2023</p>
-                                <p class="list-meta"><i class="fas fa-flask icon"></i> Fasting required for 12 hours prior</p>
-                            </div>
-                            <div>
-                                <span class="status-tag pending">Pending</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Prescription List Section -->
+            <section id="prescriptionsList">
+                <div class="container">
+                    <h2 class="section-title">Your Prescriptions</h2>
+                    <div class="list-container" id="prescriptionsContainer">
+    {% for p in prescriptions %}
+    <div class="prescription-item">
+        <div class="list-item-content-flex">
+            <div class="list-item-text">
+                <h3 class="list-title">{{ p.medication }}</h3>
+                <p class="list-subtitle">{{ p.type }}</p>
+                <p class="list-meta"><i class="far fa-calendar-alt icon"></i> Started: {{ p.start_date }}</p>
+                <p class="list-meta"><i class="fas fa-prescription-bottle-alt icon"></i> {{ p.dosage }}</p>
+                {% if p.instructions %}
+                <p class="list-meta">{{ p.instructions }}</p>
+                {% endif %}
             </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div id="contact">
-                    <h3 class="footer-title">Contact Us</h3>
-                    <p class="footer-text"><i class="fas fa-map-marker-alt icon"></i> 123 Medical Center Drive, Suite 400</p>
-                    <p class="footer-text"><i class="fas fa-phone icon"></i> (555) 123-4567</p>
-                    <p class="footer-text"><i class="fas fa-envelope icon"></i> info@medicareplus.com</p>
-                </div>
-                <div>
-                    <h3 class="footer-title">Quick Links</h3>
-                    <ul class="footer-list">
-                        <li><a href="#" class="footer-link">Patient Portal</a></li>
-                        <li><a href="#" class="footer-link">Find a Doctor</a></li>
-                        <li><a href="#" class="footer-link">Billing & Insurance</a></li>
-                        <li><a href="#" class="footer-link">Medical Records</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="footer-title">About MediCarePlus</h3>
-                    <p class="footer-about">Comprehensive healthcare services with a patient-first approach.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>© 2023 MediCarePlus. All rights reserved.</p>
+            <div>
+                <a href="{{ url_for('delete_prescription', prescription_id=p._id) }}" class="status-tag active bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md text-sm transition duration-300">Delete</a>
             </div>
         </div>
-    </footer>
-</body>
-</html>
+    </div>
+    {% endfor %}
+</div>
+
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div id="contact">
+                        <h3 class="footer-title">Contact Us</h3>
+                        <p class="footer-text"><i class="fas fa-map-marker-alt icon"></i> 123 Medical Center Drive, Suite 400</p>
+                        <p class="footer-text"><i class="fas fa-phone icon"></i> (555) 123-4567</p>
+                        <p class="footer-text"><i class="fas fa-envelope icon"></i> info@medicareplus.com</p>
+                    </div>
+                    <div>
+                        <h3 class="footer-title">Quick Links</h3>
+                        <ul class="footer-list">
+                            <li><a href="#" class="footer-link">Patient Portal</a></li>
+                            <li><a href="#" class="footer-link">Find a Doctor</a></li>
+                            <li><a href="#" class="footer-link">Billing & Insurance</a></li>
+                            <li><a href="#" class="footer-link">Medical Records</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="footer-title">About MediCarePlus</h3>
+                        <p class="footer-about">Comprehensive healthcare services with a patient-first approach.</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="copyright">
+                    <p>© 2023 MediCarePlus. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+    </html>

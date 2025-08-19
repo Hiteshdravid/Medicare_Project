@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Appointments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Your Scheduled Appointments</h1>
+
+        {% if appointments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Patient Name</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Doctor</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Date</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Time</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Status</th>
+                            <th class="py-3 px-4 text-left text-gray-700 font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4">{{ appointment.full_name }}</td>
+                            <td class="py-3 px-4">{{ appointment.doctor_name }}</td>
+                            <td class="py-3 px-4">{{ appointment.appointment_date }}</td>
+                            <td class="py-3 px-4">{{ appointment.appointment_time }}</td>
+                            <td class="py-3 px-4">
+                                {% if appointment.status == 'Confirmed' %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">Confirmed</span>
+                                {% elif appointment.status == 'Pending' %}
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">Pending</span>
+                                {% else %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4">
+                                <a href="{{ url_for('cancel_appointment', appointment_id=appointment._id,sample=appointment.is_sample) }}" 
+                                   class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md text-sm transition duration-300">
+                                    Cancel
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600">You have no scheduled appointments.</p>
+        {% endif %}
+
+        <div class="mt-8">
+            <a href="{{ url_for('index') }}" 
+               class="text-blue-600 hover:text-blue-800 transition duration-300">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
